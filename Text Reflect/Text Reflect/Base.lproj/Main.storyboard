@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7531" systemVersion="14C1514" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vXZ-lx-hvc">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7520"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="ufC-wZ-h7g">
+            <objects>
+                <viewController id="vXZ-lx-hvc" customClass="ViewController" customModule="Text_Reflect" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="jyV-Pf-zRb"/>
+                        <viewControllerLayoutGuide type="bottom" id="2fi-mo-0CV"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YEe-mZ-VDq">
+                                <rect key="frame" x="120" y="122" width="85" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="85" id="PzB-WN-Rdw"/>
+                                    <constraint firstAttribute="height" constant="30" id="nrE-3l-y6B"/>
+                                </constraints>
+                                <state key="normal" title="Reglect Text">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="buttonTapped:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="g0G-S1-KFw"/>
+                                </connections>
+                            </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="GeA-oQ-Z88">
+                                <rect key="frame" x="41" y="70" width="238" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="GUj-dt-Hce"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="H48-Uf-kfy">
+                                <rect key="frame" x="39" y="187" width="238" height="97"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="97" id="nhF-5S-YqV"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="GeA-oQ-Z88" firstAttribute="centerX" secondItem="YEe-mZ-VDq" secondAttribute="centerX" constant="-2.5" id="EFk-z9-Pdh"/>
+                            <constraint firstItem="YEe-mZ-VDq" firstAttribute="top" secondItem="GeA-oQ-Z88" secondAttribute="bottom" constant="22" id="Jtt-7j-mVX"/>
+                            <constraint firstItem="H48-Uf-kfy" firstAttribute="top" secondItem="YEe-mZ-VDq" secondAttribute="bottom" constant="35" id="SGg-eP-Cec"/>
+                            <constraint firstItem="GeA-oQ-Z88" firstAttribute="width" secondItem="H48-Uf-kfy" secondAttribute="width" id="WGU-rp-Uz1"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="GeA-oQ-Z88" secondAttribute="trailing" constant="25" id="acl-W2-VCL"/>
+                            <constraint firstItem="GeA-oQ-Z88" firstAttribute="centerX" secondItem="H48-Uf-kfy" secondAttribute="centerX" constant="2" id="nIu-me-vtr"/>
+                            <constraint firstItem="GeA-oQ-Z88" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="25" id="uCx-uy-NZw"/>
+                            <constraint firstItem="GeA-oQ-Z88" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" constant="50" id="uwS-6s-bfV"/>
+                        </constraints>
+                    </view>
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+                    <connections>
+                        <outlet property="text" destination="H48-Uf-kfy" id="wK9-ZR-yu8"/>
+                        <outlet property="textField" destination="GeA-oQ-Z88" id="Bel-jB-aVf"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="285" y="337"/>
+        </scene>
+    </scenes>
+</document>

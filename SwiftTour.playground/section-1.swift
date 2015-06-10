@@ -426,7 +426,6 @@ for c in card.deck(){
 
 
 protocol Stringify{
-    var val: Int {get}
     func toString() -> String
     mutating func adjust()
 }
@@ -453,10 +452,102 @@ valC.toString()
 valC.adjust()
 valC.toString()
 
+struct SimpleStruct: Stringify{
+    var val = 100
+    
+    func toString() -> String {
+        return "This is \(val)"
+    }
+    
+    mutating func adjust() {
+        val = val * 2
+    }
+    
+}
+
+var s = SimpleStruct()
+s.toString()
+s.adjust()
+s.toString()
 
 
+extension Int : Stringify{
+    
+    func toString() -> String {
+        return "this is \(self)"
+    }
+    
+    mutating func adjust() {
+        if(self % 10 >= 5){
+            self -= ((self + 10) % 10)
+        }else{
+            self -= (self % 10)
+        }
+        
+    }
+}
 
 
+var num = 17
+num.toString()
+num.adjust()
+println(num)
 
 
+func repete<Item>(item: Item, times: Int) -> [Item]{
+    var array :[Item] = []
+    for i in 0..<times {
+        array.append(item)
+    }
+    return array
+}
 
+repete("test", 5)
+repete(5, 5)
+
+
+class Printer<T>{
+    var value:T
+    init(value:T){
+        self.value = value
+    }
+    
+    func toString() -> String{
+        return "The value is \(value)"
+    }
+}
+
+var x:Printer<Int> = Printer(value: 10)
+x.toString()
+
+var y:Printer<String> = Printer(value: "There you go")
+y.toString()
+
+
+enum Opt<T>{
+    
+    case None
+    case Some(T)
+
+}
+
+var nothing: Opt<Int> = Opt.None
+nothing = Opt.Some(10)
+
+func hasAny<T, U where T: SequenceType, U:SequenceType, T.Generator.Element: Equatable, U.Generator.Element: Equatable, T.Generator.Element == U.Generator.Element>(one: T, two: U) -> Bool{
+    for x in one {
+        for y in two {
+            if x == y{
+                return true
+            }
+        }
+    }
+    return false
+}
+
+
+hasAny([1,2,3,4,5], [5])
+
+hasAny([5], [1,2,3,4,5])
+
+hasAny([1,2,3,4,5,6],[7,8,9,0])
