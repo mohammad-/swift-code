@@ -11,6 +11,12 @@ import AVFoundation
 import Foundation
 import MobileCoreServices
 
+protocol DataReceived{
+    func dataReceived()
+}
+
+var dataReceivedListener:DataReceived?
+
 class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnectionDelegate {
 
     var URL:NSURL = NSURL()
@@ -23,6 +29,7 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     var readFileHandle:NSFileHandle?
     var totalDataLength:Int64 = 0
     var isFinishedLoading:Bool = false
+    var decryptor = CommonCrytoFunctions(key:"111C8197C8BDEC29005F9E9F5EAF54D9", andIV: "3BD2CD5D9A309F8267BB89EE66AF9840")
     
     init(URL: NSURL) {
         super.init()
@@ -71,40 +78,41 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
         self.mimeType = response.MIMEType;
         self.contentLength = response.expectedContentLength
+        var req:AVAssetResourceLoadingRequest = self.requests.objectAtIndex(0) as! AVAssetResourceLoadingRequest
+        req.contentInformationRequest.byteRangeAccessSupported = true
+        req.contentInformationRequest.contentLength = self.contentLength!
+        if let contentType =  UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType, nil).takeUnretainedValue() as? String{
+            req.contentInformationRequest.contentType = contentType
+        }
+
     }
     
     func connection(connection: NSURLConnection, didReceiveData data: NSData) {
-        totalDataLength += data.length
         if let handle = fileHandle {
+            var decryptedData = self.decryptor.decrypt(data)
+            totalDataLength += decryptedData.length
+            handle.writeData(decryptedData)
             handle.seekToEndOfFile()
-            handle.writeData(data)
         }
-        
-        if self.requests.count > 0{
-            if let req:AVAssetResourceLoadingRequest = self.requests.objectAtIndex(0) as? AVAssetResourceLoadingRequest{
-                let dataRequest = req.dataRequest
+        for req in requests {
+            let dataRequest = req.dataRequest!
+            if totalDataLength >= dataRequest.currentOffset{
                 let offSet:Int = dataRequest.currentOffset != 0 ? Int(dataRequest.currentOffset) : Int(dataRequest.requestedOffset)
                 let requestedLength:Int = dataRequest.requestedLength
-
                 self.readFileHandle?.seekToFileOffset(UInt64(offSet))
                 if Int64(requestedLength - offSet) <= Int64(totalDataLength - offSet) {
-                    if let infoReq = req.contentInformationRequest {
-                        infoReq.contentLength = self.contentLength!
-                        infoReq.byteRangeAccessSupported = true
-                        if let contentType =  UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType, nil).takeUnretainedValue() as? String{
-                            infoReq.contentType = contentType
-                        }
-                    }
-                    if let dataToSend = readFileHandle?.readDataOfLength(requestedLength - offSet){
-                        dataRequest.respondWithData(dataToSend)
-                        req.finishLoading()
-                        self.requests.removeObjectAtIndex(0)
-                    }
+                    let dataToSend = readFileHandle?.readDataOfLength(requestedLength - offSet)
+                    dataRequest.respondWithData(dataToSend)
+                    req.finishLoading()
+                    self.requests.removeObject(req)
+                    println("\(req)")
                 }else{
-                    if let dataToSend = readFileHandle?.readDataToEndOfFile(){
-                        dataRequest.respondWithData(dataToSend)
-                    }
+                    let dataToSend = readFileHandle?.readDataToEndOfFile()
+                    dataRequest.respondWithData(dataToSend)
                 }
+            }
+            if dataReceivedListener != nil {
+                dataReceivedListener?.dataReceived()
             }
         }
     }
@@ -123,29 +131,25 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
                 
                 self.readFileHandle?.seekToFileOffset(UInt64(offSet))
                 if Int64(requestedLength - offSet) <= totalDataLength - offSet {
-                    if let infoReq = req.contentInformationRequest {
-                        infoReq.contentLength = self.contentLength!
-                        infoReq.byteRangeAccessSupported = true
-                        if let contentType =  UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType, nil).takeUnretainedValue() as? String{
-                            infoReq.contentType = contentType
-                        }
-                    }
                     if let dataToSend = readFileHandle?.readDataOfLength(requestedLength - offSet){
                         dataRequest.respondWithData(dataToSend)
                         req.finishLoading()
-                        self.requests.removeObjectAtIndex(0)
+                        self.requests.removeObject(req)
+                        println("\(req)")
                     }
                 }else{
                     if let dataToSend = readFileHandle?.readDataToEndOfFile(){
                         dataRequest.respondWithData(dataToSend)
                         req.finishLoading()
-                        self.requests.removeObjectAtIndex(0)
+                        self.requests.removeObject(req)
+                        println("\(req)")
                     }
                 }
             }
         }
         self.fileHandle?.closeFile()
         isFinishedLoading = true;
+        println("finished loading")
     }
     
     override func finalize() {
