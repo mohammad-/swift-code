@@ -12,7 +12,7 @@ import Foundation
 import MobileCoreServices
 
 protocol DataReceived{
-    func dataReceived()
+    func dataReceived(progress:Float)
 }
 
 var dataReceivedListener:DataReceived?
@@ -25,7 +25,7 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     var mimeType:CFString?
     var contentLength:Int64?
     var cacheFilePath:String?
-    var fileHandle:NSFileHandle?
+    var writeFileHandle:NSFileHandle?
     var readFileHandle:NSFileHandle?
     var totalDataLength:Int64 = 0
     var isFinishedLoading:Bool = false
@@ -34,17 +34,24 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     init(URL: NSURL) {
         super.init()
         self.URL = URL
-        let request = NSURLRequest(URL: URL)
-        connection = NSURLConnection(request: request, delegate: self, startImmediately: false)
-        
+        let request = NSMutableURLRequest(URL: URL)
         if let cacheFileName = URL.absoluteString?.componentsSeparatedByString("/").last,
            let docDirPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as? String{
                 self.cacheFilePath = docDirPath.stringByAppendingPathComponent(cacheFileName)
-                if NSFileManager.defaultManager().createFileAtPath(self.cacheFilePath!, contents: nil, attributes: nil) == true {
-                    self.fileHandle = NSFileHandle(forWritingAtPath: self.cacheFilePath!)
+                if NSFileManager.defaultManager().fileExistsAtPath(self.cacheFilePath!) == true{
+                    self.writeFileHandle = NSFileHandle(forWritingAtPath: self.cacheFilePath!)
+                    self.writeFileHandle?.seekToEndOfFile()
+                    self.readFileHandle = NSFileHandle(forReadingAtPath: self.cacheFilePath!)
+                    request.setValue("bytes=\(self.writeFileHandle?.offsetInFile)-", forHTTPHeaderField: "Range")
+                    self.totalDataLength = Int64((self.writeFileHandle?.offsetInFile)!)
+                    
+                }else if NSFileManager.defaultManager().createFileAtPath(self.cacheFilePath!, contents: nil, attributes: nil) == true {
+                    self.writeFileHandle = NSFileHandle(forWritingAtPath: self.cacheFilePath!)
                     self.readFileHandle = NSFileHandle(forReadingAtPath: self.cacheFilePath!)
                 }
+
         }
+        connection = NSURLConnection(request: request, delegate: self, startImmediately: false)
     }
     
     func start(){
@@ -76,7 +83,7 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     
     
     func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
-        self.mimeType = response.MIMEType;
+        self.mimeType = "video/mp4";
         self.contentLength = response.expectedContentLength
         var req:AVAssetResourceLoadingRequest = self.requests.objectAtIndex(0) as! AVAssetResourceLoadingRequest
         req.contentInformationRequest.byteRangeAccessSupported = true
@@ -88,7 +95,7 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     }
     
     func connection(connection: NSURLConnection, didReceiveData data: NSData) {
-        if let handle = fileHandle {
+        if let handle = writeFileHandle {
             var decryptedData = self.decryptor.decrypt(data)
             totalDataLength += decryptedData.length
             handle.writeData(decryptedData)
@@ -105,14 +112,13 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
                     dataRequest.respondWithData(dataToSend)
                     req.finishLoading()
                     self.requests.removeObject(req)
-                    println("\(req)")
                 }else{
                     let dataToSend = readFileHandle?.readDataToEndOfFile()
                     dataRequest.respondWithData(dataToSend)
                 }
             }
             if dataReceivedListener != nil {
-                dataReceivedListener?.dataReceived()
+                dataReceivedListener?.dataReceived(Float(totalDataLength)/Float(self.contentLength!))
             }
         }
     }
@@ -135,19 +141,17 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
                         dataRequest.respondWithData(dataToSend)
                         req.finishLoading()
                         self.requests.removeObject(req)
-                        println("\(req)")
                     }
                 }else{
                     if let dataToSend = readFileHandle?.readDataToEndOfFile(){
                         dataRequest.respondWithData(dataToSend)
                         req.finishLoading()
                         self.requests.removeObject(req)
-                        println("\(req)")
                     }
                 }
             }
         }
-        self.fileHandle?.closeFile()
+        self.writeFileHandle?.closeFile()
         isFinishedLoading = true;
         println("finished loading")
     }
