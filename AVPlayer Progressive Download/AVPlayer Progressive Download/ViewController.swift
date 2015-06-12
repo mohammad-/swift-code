@@ -15,6 +15,9 @@ enum PlayerStatus{
 }
 class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataReceived {
 
+    let current_file = "L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
+//    let current_file = "openssl_output.mp4"
+    
     @IBOutlet weak var deleteContents: UIButton!
     @IBOutlet weak var lblCurrentTime: UILabel!
     @IBOutlet weak var lblTotalTime: UILabel!
@@ -70,15 +73,14 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
         self.deleteContents.hidden = true;
         self.pause.hidden = false;
         self.play.hidden = true;
-        let url = NSURL(string: "myschema://L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4")
+        //"myschema://L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
+        let url = NSURL(string: "myschema://\(current_file)")
         if playerStatus == PlayerStatus.Stopped {
             asset = AVURLAsset(URL: url, options: nil)
             asset?.resourceLoader.setDelegate(self, queue: dispatch_get_main_queue())
             asset?.loadValuesAsynchronouslyForKeys(["playable"], completionHandler: { () -> Void in
-                println("Asset Loaded")
                 self.item = AVPlayerItem(asset: self.asset)
                 self.player.replaceCurrentItemWithPlayerItem(self.item)
-                
                 self.avPlayerLayer = AVPlayerLayer(player: self.player)
                 self.avPlayerLayer?.frame = self.videoView.bounds
                 self.avPlayerLayer?.videoGravity =  AVLayerVideoGravityResizeAspect
@@ -138,7 +140,7 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
     }
     
     @IBAction func deleteStoredContents(sender: AnyObject) {
-        let cacheFileName = "L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
+        let cacheFileName = current_file
         if let docDirPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as? String{
                 let cacheFilePath = docDirPath.stringByAppendingPathComponent(cacheFileName)
                 if NSFileManager.defaultManager().fileExistsAtPath(cacheFilePath) == true{

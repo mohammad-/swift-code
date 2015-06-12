@@ -18,7 +18,8 @@ protocol DataReceived{
 var dataReceivedListener:DataReceived?
 
 class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnectionDelegate {
-
+    let fileSize = 178248880
+//                  65000352
     var URL:NSURL = NSURL()
     var connection: NSURLConnection?
     let requests = NSMutableArray(capacity: 5)
@@ -35,6 +36,8 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
         super.init()
         self.URL = URL
         let request = NSMutableURLRequest(URL: URL)
+        //small file 12494784
+        //big file  178248880
         if let cacheFileName = URL.absoluteString?.componentsSeparatedByString("/").last,
            let docDirPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as? String{
                 self.cacheFilePath = docDirPath.stringByAppendingPathComponent(cacheFileName)
@@ -42,10 +45,17 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
                     self.writeFileHandle = NSFileHandle(forWritingAtPath: self.cacheFilePath!)
                     self.writeFileHandle?.seekToEndOfFile()
                     self.readFileHandle = NSFileHandle(forReadingAtPath: self.cacheFilePath!)
-                    request.setValue("bytes=\(self.writeFileHandle?.offsetInFile)-", forHTTPHeaderField: "Range")
+                    if let endPoint = self.writeFileHandle?.offsetInFile{
+                        let range = "bytes=\(endPoint)-\(fileSize)"
+                        println(range)
+                        request.addValue(range, forHTTPHeaderField: "Range")
+                    }
                     self.totalDataLength = Int64((self.writeFileHandle?.offsetInFile)!)
                     
                 }else if NSFileManager.defaultManager().createFileAtPath(self.cacheFilePath!, contents: nil, attributes: nil) == true {
+                    let range = "bytes=\(0)-\(fileSize)"
+                    println(range)
+                    request.addValue(range, forHTTPHeaderField: "Range")
                     self.writeFileHandle = NSFileHandle(forWritingAtPath: self.cacheFilePath!)
                     self.readFileHandle = NSFileHandle(forReadingAtPath: self.cacheFilePath!)
                 }
@@ -85,6 +95,8 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
         self.mimeType = "video/mp4";
         self.contentLength = response.expectedContentLength
+
+        println("\((response as? NSHTTPURLResponse)?.statusCode)")
         var req:AVAssetResourceLoadingRequest = self.requests.objectAtIndex(0) as! AVAssetResourceLoadingRequest
         req.contentInformationRequest.byteRangeAccessSupported = true
         req.contentInformationRequest.contentLength = self.contentLength!
@@ -97,9 +109,12 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     func connection(connection: NSURLConnection, didReceiveData data: NSData) {
         if let handle = writeFileHandle {
             var decryptedData = self.decryptor.decrypt(data)
+            print("\(totalDataLength) + \(decryptedData.length) " )
             totalDataLength += decryptedData.length
+            print("\(totalDataLength)\n")
             handle.writeData(decryptedData)
             handle.seekToEndOfFile()
+
         }
         for req in requests {
             let dataRequest = req.dataRequest!
