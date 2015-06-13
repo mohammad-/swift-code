@@ -36,7 +36,7 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
         super.init()
         self.URL = URL
         let request = NSMutableURLRequest(URL: URL)
-        connection = NSURLConnection(request: request, delegate: self, startImmediately: false)        
+        connection = NSURLConnection(request: request, delegate: self, startImmediately: false)
         if let cacheFileName = URL.absoluteString?.componentsSeparatedByString("/").last,
            let docDirPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as? String{
                 self.cacheFilePath = docDirPath.stringByAppendingPathComponent(cacheFileName)
@@ -54,27 +54,12 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     }
     
     func addRequest(req: AVAssetResourceLoadingRequest){
-        if isFinishedLoading == true{
-            let dataRequest = req.dataRequest
-            self.readFileHandle?.seekToFileOffset(UInt64(dataRequest.currentOffset))
-            if let infoReq = req.contentInformationRequest {
-                infoReq.contentLength = self.contentLength!
-                infoReq.byteRangeAccessSupported = true
-                if let contentType =  UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType, nil).takeUnretainedValue() as? String{
-                    infoReq.contentType = contentType
-                }
-            }
-            if let dataToSend = readFileHandle?.readDataOfLength(req.dataRequest.requestedLength){
-                dataRequest.respondWithData(dataToSend)
-                req.finishLoading()
-            }
-        }else{
-            self.requests.addObject(req)
+        self.requests.addObject(req)
+        if isFinishedLoading {
+            processPlayerRequest()
         }
-
     }
-    
-    
+
     func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
         self.mimeType = "video/mp4";
         self.contentLength = response.expectedContentLength
@@ -92,33 +77,13 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     func connection(connection: NSURLConnection, didReceiveData data: NSData) {
         if let handle = writeFileHandle {
             var decryptedData = self.decryptor.decrypt(data)
-            print("\(totalDataLength) + \(decryptedData.length) " )
             totalDataLength += decryptedData.length
-            print("\(totalDataLength)\n")
             handle.writeData(decryptedData)
             handle.seekToEndOfFile()
         }
         
-        for req in requests {
-            let dataRequest = req.dataRequest!
-            if totalDataLength >= dataRequest.currentOffset{
-                let offSet:Int = dataRequest.currentOffset != 0 ? Int(dataRequest.currentOffset) : Int(dataRequest.requestedOffset)
-                let requestedLength:Int = dataRequest.requestedLength
-                self.readFileHandle?.seekToFileOffset(UInt64(offSet))
-                if Int64(requestedLength - offSet) <= Int64(totalDataLength - offSet) {
-                    let dataToSend = readFileHandle?.readDataOfLength(requestedLength - offSet)
-                    dataRequest.respondWithData(dataToSend)
-                    req.finishLoading()
-                    self.requests.removeObject(req)
-                }else{
-                    let dataToSend = readFileHandle?.readDataToEndOfFile()
-                    dataRequest.respondWithData(dataToSend)
-                }
-            }
-            if dataReceivedListener != nil {
-                dataReceivedListener?.dataReceived(Float(totalDataLength)/Float(self.contentLength!))
-            }
-        }
+        processPlayerRequest()
+        
     }
     
     func connection(connection: NSURLConnection, didFailWithError error: NSError) {
@@ -127,34 +92,37 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     
     
     func connectionDidFinishLoading(connection: NSURLConnection) {
-        while self.requests.count > 0{
-            if let req:AVAssetResourceLoadingRequest = self.requests.objectAtIndex(0) as? AVAssetResourceLoadingRequest{
-                let dataRequest = req.dataRequest
-                let offSet:Int = dataRequest.currentOffset != 0 ? Int(dataRequest.currentOffset) : Int(dataRequest.requestedOffset)
-                let requestedLength:Int = dataRequest.requestedLength
-                
-                self.readFileHandle?.seekToFileOffset(UInt64(offSet))
-                if Int64(requestedLength - offSet) <= totalDataLength - offSet {
-                    if let dataToSend = readFileHandle?.readDataOfLength(requestedLength - offSet){
-                        dataRequest.respondWithData(dataToSend)
-                        req.finishLoading()
-                        self.requests.removeObject(req)
-                    }
-                }else{
-                    if let dataToSend = readFileHandle?.readDataToEndOfFile(){
-                        dataRequest.respondWithData(dataToSend)
-                        req.finishLoading()
-                        self.requests.removeObject(req)
-                    }
-                }
-            }
-        }
+        self.writeFileHandle?.writeData(decryptor.final())
         self.writeFileHandle?.closeFile()
         isFinishedLoading = true;
+        processPlayerRequest()
         println("finished loading")
     }
     
     override func finalize() {
         self.readFileHandle?.closeFile()
+    }
+    
+    func  processPlayerRequest(){
+        for req in requests {
+            let dataRequest = req.dataRequest!
+            if totalDataLength > dataRequest.currentOffset {
+                readFileHandle?.seekToFileOffset(UInt64(dataRequest.currentOffset))
+                let offSet:Int64 = dataRequest.currentOffset != 0 ? dataRequest.currentOffset : dataRequest.requestedOffset
+                let requestedLength:Int64 = Int64(dataRequest.requestedLength)
+                let dataToSend = readFileHandle?.readDataOfLength(requestedLength - offSet)
+                dataRequest.respondWithData(dataToSend)
+                if (readFileHandle?.offsetInFile >= UInt64(requestedLength)) || isFinishedLoading {
+                    println(" finish loading \(readFileHandle?.offsetInFile) => \(requestedLength)")
+                    req.finishLoading()
+                    self.requests.removeObject(req)
+                }
+            }
+            
+            if dataReceivedListener != nil {
+                dataReceivedListener?.dataReceived(Float(totalDataLength)/Float(self.contentLength!))
+            }
+        }
+    
     }
 }

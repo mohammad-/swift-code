@@ -48,6 +48,8 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
     override func layoutSublayersOfLayer(layer: CALayer!) {
         super.layoutSublayersOfLayer(layer)
     }
+    
+    
     func tick(){
         var duration = Float(CMTimeGetSeconds(self.item.duration))
         var current = Float(CMTimeGetSeconds(self.item.currentTime()))
@@ -154,5 +156,18 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
         self.deleteContents.hidden = true;
     }
 
+    override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+        
+        NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+            if let superLayer = self.avPlayerLayer?.superlayer {
+                println("will transform")
+                self.avPlayerLayer?.removeFromSuperlayer()
+                self.avPlayerLayer = AVPlayerLayer(player: self.player)
+                self.avPlayerLayer?.frame = self.videoView.bounds
+                self.avPlayerLayer?.videoGravity =  AVLayerVideoGravityResizeAspect
+                self.videoView.layer.addSublayer(self.avPlayerLayer)
+            }
+        });
+    }
 }
 
