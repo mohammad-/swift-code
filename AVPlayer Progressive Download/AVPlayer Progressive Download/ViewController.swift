@@ -39,6 +39,9 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.view.bringSubviewToFront(self.play)
+        self.view.bringSubviewToFront(self.pause)
+
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -166,6 +169,8 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
                 self.avPlayerLayer?.frame = self.videoView.bounds
                 self.avPlayerLayer?.videoGravity =  AVLayerVideoGravityResizeAspect
                 self.videoView.layer.addSublayer(self.avPlayerLayer)
+                self.view.bringSubviewToFront(self.play)
+                self.view.bringSubviewToFront(self.pause)
             }
         });
     }
