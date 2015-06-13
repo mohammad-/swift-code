@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Mohammad Bharmal. All rights reserved.
 //
 
+//openssl enc -aes-128-cbc -in L1-Introduction_to_Finite-State_Machines_and_Regular_Languages.mp4 -k mohammadmohammad -nosalt  -out L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4
 import UIKit
 import AVFoundation
 enum PlayerStatus{
@@ -14,10 +15,11 @@ enum PlayerStatus{
     case Stopped
 }
 class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataReceived {
-
+    let host = "https://s3-ap-northeast-1.amazonaws.com/fans-software/"
+//    let host = "http://192.168.11.4:8080/"
     let current_file = "L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
 //    let current_file = "openssl_output.mp4"
-    
+
     @IBOutlet weak var deleteContents: UIButton!
     @IBOutlet weak var lblCurrentTime: UILabel!
     @IBOutlet weak var lblTotalTime: UILabel!
@@ -81,13 +83,15 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
             asset?.loadValuesAsynchronouslyForKeys(["playable"], completionHandler: { () -> Void in
                 self.item = AVPlayerItem(asset: self.asset)
                 self.player.replaceCurrentItemWithPlayerItem(self.item)
-                self.avPlayerLayer = AVPlayerLayer(player: self.player)
-                self.avPlayerLayer?.frame = self.videoView.bounds
-                self.avPlayerLayer?.videoGravity =  AVLayerVideoGravityResizeAspect
-                self.videoView.layer.addSublayer(self.avPlayerLayer)
                 self.player.play()
-                
                 self.playerStatus = PlayerStatus.Playing
+                NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+                    self.avPlayerLayer = AVPlayerLayer(player: self.player)
+                    self.avPlayerLayer?.frame = self.videoView.bounds
+                    self.avPlayerLayer?.videoGravity =  AVLayerVideoGravityResizeAspect
+                    self.videoView.layer.addSublayer(self.avPlayerLayer)
+
+                });
                 self.timer = NSTimer(timeInterval: 0.5, target: self, selector: Selector("tick"), userInfo: nil, repeats: true)
                 NSRunLoop.mainRunLoop().addTimer(self.timer!, forMode: NSDefaultRunLoopMode)
             });
@@ -113,7 +117,7 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
     func resourceLoader(resourceLoader: AVAssetResourceLoader!, shouldWaitForLoadingOfRequestedResource loadingRequest: AVAssetResourceLoadingRequest!) -> Bool {
         if self.connection == nil {
             if let fileName = loadingRequest.request.URL?.absoluteString?.componentsSeparatedByString("://").last{
-                if let url = NSURL(string: "https://s3-ap-northeast-1.amazonaws.com/fans-software/".stringByAppendingString(fileName)){
+                if let url = NSURL(string: host.stringByAppendingString(fileName)){
                     self.connection = DownloadConnection(URL: url)
                     self.connection?.addRequest(loadingRequest)
                     dataReceivedListener = self
