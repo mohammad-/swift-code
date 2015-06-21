@@ -30,11 +30,12 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     var readFileHandle:NSFileHandle?
     var totalDataLength:Int64 = 0
     var isFinishedLoading:Bool = false
-    var decryptor = CommonCrytoFunctions(key:"111C8197C8BDEC29005F9E9F5EAF54D9", andIV: "3BD2CD5D9A309F8267BB89EE66AF9840")
+    var decryptor:CommonCrytoFunctions?
     
-    init(URL: NSURL) {
+    init(URL: NSURL, key:String, IV:String) {
         super.init()
         self.URL = URL
+        self.decryptor = CommonCrytoFunctions(key:key, andIV: IV)
         let request = NSMutableURLRequest(URL: URL)
         connection = NSURLConnection(request: request, delegate: self, startImmediately: false)
         if let cacheFileName = URL.absoluteString?.componentsSeparatedByString("/").last,
@@ -52,7 +53,19 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
             con.start()
         }
     }
-    
+
+    func stop(){
+        if let con = connection{
+            if !isFinishedLoading {
+                con.cancel()
+                isFinishedLoading = true
+                self.writeFileHandle?.closeFile()
+                processPlayerRequest()
+            }
+
+        }
+    }
+
     func addRequest(req: AVAssetResourceLoadingRequest){
         self.requests.addObject(req)
         if isFinishedLoading {
@@ -71,14 +84,13 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
         if let contentType =  UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType, nil).takeUnretainedValue() as? String{
             req.contentInformationRequest.contentType = contentType
         }
-
     }
     
     func connection(connection: NSURLConnection, didReceiveData data: NSData) {
         if let handle = writeFileHandle {
-            var decryptedData = self.decryptor.decrypt(data)
-            totalDataLength += decryptedData.length
-            handle.writeData(decryptedData)
+            var decryptedData = self.decryptor?.decrypt(data)
+            totalDataLength += (decryptedData?.length)!
+            handle.writeData(decryptedData!)
             handle.seekToEndOfFile()
         }
         
@@ -92,7 +104,7 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     
     
     func connectionDidFinishLoading(connection: NSURLConnection) {
-        self.writeFileHandle?.writeData(decryptor.final())
+        self.writeFileHandle?.writeData((decryptor?.final())!)
         self.writeFileHandle?.closeFile()
         isFinishedLoading = true;
         processPlayerRequest()

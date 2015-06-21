@@ -15,6 +15,9 @@
 		1186CDCB1B27C4680025DD96 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1186CDC91B27C4680025DD96 /* LaunchScreen.xib */; };
 		1186CDD71B27C4680025DD96 /* AVPlayer_Progressive_DownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1186CDD61B27C4680025DD96 /* AVPlayer_Progressive_DownloadTests.swift */; };
 		1186CDE11B27C48C0025DD96 /* DownloadConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1186CDE01B27C48C0025DD96 /* DownloadConnection.swift */; };
+		11A730691B2C29B300CFAE88 /* ParameterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A730681B2C29B200CFAE88 /* ParameterViewController.swift */; };
+		11A7306D1B2C384700CFAE88 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A7306B1B2C384700CFAE88 /* Fabric.framework */; };
+		11A7306E1B2C384700CFAE88 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A7306C1B2C384700CFAE88 /* Crashlytics.framework */; };
 		11CE948D1B284C290008579D /* CommonCrytoFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = 11CE948C1B284C290008579D /* CommonCrytoFunctions.m */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +44,9 @@
 		1186CDD51B27C4680025DD96 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1186CDD61B27C4680025DD96 /* AVPlayer_Progressive_DownloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayer_Progressive_DownloadTests.swift; sourceTree = "<group>"; };
 		1186CDE01B27C48C0025DD96 /* DownloadConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadConnection.swift; sourceTree = "<group>"; };
+		11A730681B2C29B200CFAE88 /* ParameterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterViewController.swift; sourceTree = "<group>"; };
+		11A7306B1B2C384700CFAE88 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
+		11A7306C1B2C384700CFAE88 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		11CE948A1B284C280008579D /* AVPlayer Progressive Download-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AVPlayer Progressive Download-Bridging-Header.h"; sourceTree = "<group>"; };
 		11CE948B1B284C290008579D /* CommonCrytoFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommonCrytoFunctions.h; sourceTree = "<group>"; };
 		11CE948C1B284C290008579D /* CommonCrytoFunctions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommonCrytoFunctions.m; sourceTree = "<group>"; };
@@ -51,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				11A7306E1B2C384700CFAE88 /* Crashlytics.framework in Frameworks */,
+				11A7306D1B2C384700CFAE88 /* Fabric.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +95,7 @@
 			children = (
 				11CE94831B284ADD0008579D /* CommonCrypto */,
 				1186CDBD1B27C4680025DD96 /* AppDelegate.swift */,
+				11A730681B2C29B200CFAE88 /* ParameterViewController.swift */,
 				1186CDC21B27C4680025DD96 /* ViewController.swift */,
 				1186CDE01B27C48C0025DD96 /* DownloadConnection.swift */,
 				1186CDC41B27C4680025DD96 /* Main.storyboard */,
@@ -101,6 +110,8 @@
 		1186CDBB1B27C4680025DD96 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				11A7306B1B2C384700CFAE88 /* Fabric.framework */,
+				11A7306C1B2C384700CFAE88 /* Crashlytics.framework */,
 				1186CDBC1B27C4680025DD96 /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -143,6 +154,7 @@
 				1186CDB41B27C4680025DD96 /* Sources */,
 				1186CDB51B27C4680025DD96 /* Frameworks */,
 				1186CDB61B27C4680025DD96 /* Resources */,
+				11A7306A1B2C37EC00CFAE88 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -228,6 +240,22 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		11A7306A1B2C37EC00CFAE88 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./Fabric.framework/run 7d7ab428181d39cde9ee95ca1d8a6015cba4d85f cb46010fb6892ecc64456668cc8f2b70725e043c4a18ef716d27aeca1f2f62f6";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		1186CDB41B27C4680025DD96 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -237,6 +265,7 @@
 				1186CDBE1B27C4680025DD96 /* AppDelegate.swift in Sources */,
 				11CE948D1B284C290008579D /* CommonCrytoFunctions.m in Sources */,
 				1186CDC11B27C4680025DD96 /* AVPlayer_Progressive_Download.xcdatamodeld in Sources */,
+				11A730691B2C29B300CFAE88 /* ParameterViewController.swift in Sources */,
 				1186CDE11B27C48C0025DD96 /* DownloadConnection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -367,9 +396,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/AVPlayer\\ Progressive\\ Download",
+				);
 				INFOPLIST_FILE = "AVPlayer Progressive Download/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "8b6c249e-fd85-48f6-935d-1904f49d26c4";
 				SWIFT_INCLUDE_PATHS = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "CommonCrypto/AVPlayer Progressive Download-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -381,9 +416,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Piyush Dobariya (T2X5S3ZW3M)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/AVPlayer\\ Progressive\\ Download",
+				);
 				INFOPLIST_FILE = "AVPlayer Progressive Download/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "a6e16961-93c6-42b8-847c-44a614164613";
 				SWIFT_INCLUDE_PATHS = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "CommonCrypto/AVPlayer Progressive Download-Bridging-Header.h";
 			};

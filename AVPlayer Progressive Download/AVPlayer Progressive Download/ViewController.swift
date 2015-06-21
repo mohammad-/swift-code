@@ -9,18 +9,17 @@
 //openssl enc -aes-128-cbc -in L1-Introduction_to_Finite-State_Machines_and_Regular_Languages.mp4 -k mohammadmohammad -nosalt  -out L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4
 import UIKit
 import AVFoundation
+
+var fileUrl = "https://s3-ap-northeast-1.amazonaws.com/fans-software/L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
+var fileKey = "111C8197C8BDEC29005F9E9F5EAF54D9"
+var fileIv = "3BD2CD5D9A309F8267BB89EE66AF9840"
+
 enum PlayerStatus{
     case Playing
     case Paused
     case Stopped
 }
 class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataReceived {
-    let host = "https://s3-ap-northeast-1.amazonaws.com/fans-software/"
-//    let host = "http://192.168.11.4:8080/"
-    let current_file = "L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
-//    let current_file = "openssl_output.mp4"
-
-    @IBOutlet weak var deleteContents: UIButton!
     @IBOutlet weak var lblCurrentTime: UILabel!
     @IBOutlet weak var lblTotalTime: UILabel!
     @IBOutlet weak var skbProgress: UISlider!
@@ -52,7 +51,6 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
         super.layoutSublayersOfLayer(layer)
     }
     
-    
     func tick(){
         var duration = Float(CMTimeGetSeconds(self.item.duration))
         var current = Float(CMTimeGetSeconds(self.item.currentTime()))
@@ -60,14 +58,15 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
         if  !duration.isNaN && duration < Float.infinity {
             var mt = Int(duration / 60)
             var st = Int(duration % 60)
-            self.lblTotalTime.text = "\(mt):\(st)"
+
+            self.lblTotalTime.text = String(format: "%02d:%02d", mt, st)
             
         }
         
         if !current.isNaN {
             var mc = Int(current / 60)
             var sc = Int(current % 60)
-            self.lblCurrentTime.text = "\(mc):\(sc)"
+            self.lblCurrentTime.text = String(format: "%02d:%02d", mc, sc)
         }
 
         if  !duration.isNaN && !current.isNaN {
@@ -77,12 +76,12 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
     }
     
     @IBAction func play(sender: AnyObject) {
-        self.deleteContents.hidden = true;
         self.pause.hidden = false;
         self.play.hidden = true;
-        //"myschema://L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
-        let url = NSURL(string: "myschema://\(current_file)")
+        let fileName = fileUrl.componentsSeparatedByString("/").last
+        let url = NSURL(string: "myschema://".stringByAppendingString(fileName!))
         if playerStatus == PlayerStatus.Stopped {
+            self.skbProgress.userInteractionEnabled = false
             asset = AVURLAsset(URL: url, options: nil)
             asset?.resourceLoader.setDelegate(self, queue: dispatch_get_main_queue())
             asset?.loadValuesAsynchronouslyForKeys(["playable"], completionHandler: { () -> Void in
@@ -122,8 +121,8 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
     func resourceLoader(resourceLoader: AVAssetResourceLoader!, shouldWaitForLoadingOfRequestedResource loadingRequest: AVAssetResourceLoadingRequest!) -> Bool {
         if self.connection == nil {
             if let fileName = loadingRequest.request.URL?.absoluteString?.componentsSeparatedByString("://").last{
-                if let url = NSURL(string: host.stringByAppendingString(fileName)){
-                    self.connection = DownloadConnection(URL: url)
+                if let url = NSURL(string: fileUrl){
+                    self.connection = DownloadConnection(URL: url, key:fileKey, IV: fileIv)
                     self.connection?.addRequest(loadingRequest)
                     dataReceivedListener = self
                     self.connection?.start()
@@ -146,19 +145,11 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
     
     func dataReceived(progress: Float) {
         self.downloadProgress.setProgress(progress, animated: true)
+        if progress == 1 {
+            self.skbProgress.userInteractionEnabled = false
+        }
     }
     
-    @IBAction func deleteStoredContents(sender: AnyObject) {
-        let cacheFileName = current_file
-        if let docDirPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as? String{
-                let cacheFilePath = docDirPath.stringByAppendingPathComponent(cacheFileName)
-                if NSFileManager.defaultManager().fileExistsAtPath(cacheFilePath) == true{
-                   NSFileManager.defaultManager().removeItemAtPath(cacheFilePath, error: nil)
-                }
-        }
-        self.deleteContents.hidden = true;
-    }
-
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         
         NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
@@ -174,5 +165,13 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
             }
         });
     }
+    
+    @IBAction func stop(sender: AnyObject) {
+        self.connection?.stop()
+        self.player.pause()
+        self.dismissViewControllerAnimated(true, completion: { () -> Void in
+        });
+    }
+
 }
 
