@@ -11,6 +11,7 @@ import UIKit
 import AVFoundation
 
 var fileUrl = "https://s3-ap-northeast-1.amazonaws.com/fans-software/L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
+//var fileUrl = "https://s3-ap-northeast-1.amazonaws.com/fans-software/openssl_output.mp4"
 var fileKey = "111C8197C8BDEC29005F9E9F5EAF54D9"
 var fileIv = "3BD2CD5D9A309F8267BB89EE66AF9840"
 
@@ -121,11 +122,25 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
     func resourceLoader(resourceLoader: AVAssetResourceLoader!, shouldWaitForLoadingOfRequestedResource loadingRequest: AVAssetResourceLoadingRequest!) -> Bool {
         if self.connection == nil {
             if let fileName = loadingRequest.request.URL?.absoluteString?.componentsSeparatedByString("://").last{
-                if let url = NSURL(string: fileUrl){
-                    self.connection = DownloadConnection(URL: url, key:fileKey, IV: fileIv)
-                    self.connection?.addRequest(loadingRequest)
-                    dataReceivedListener = self
-                    self.connection?.start()
+                if let docDirPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as? String{
+                    let localFilePath = docDirPath.stringByAppendingPathComponent(fileName)
+                    if NSFileManager.defaultManager().fileExistsAtPath(localFilePath){
+                        let localFilePath = "file:///".stringByAppendingString(localFilePath)
+                        if let url = NSURL(string: localFilePath) {
+                            self.connection = DownloadConnection(URL: url, key:fileKey, IV: fileIv)
+                            self.connection?.addRequest(loadingRequest)
+                            dataReceivedListener = self
+                            self.connection?.start()
+                            self.skbProgress.userInteractionEnabled = true
+                        }
+                    }else{
+                        if let url = NSURL(string: fileUrl) {
+                            self.connection = DownloadConnection(URL: url, key:fileKey, IV: fileIv)
+                            self.connection?.addRequest(loadingRequest)
+                            dataReceivedListener = self
+                            self.connection?.start()
+                        }
+                    }
                 }
             }
         }else{
@@ -146,7 +161,7 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
     func dataReceived(progress: Float) {
         self.downloadProgress.setProgress(progress, animated: true)
         if progress == 1 {
-            self.skbProgress.userInteractionEnabled = false
+            self.skbProgress.userInteractionEnabled = true
         }
     }
     

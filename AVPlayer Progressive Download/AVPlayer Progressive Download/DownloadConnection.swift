@@ -26,11 +26,15 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     var mimeType:CFString?
     var contentLength:Int64?
     var cacheFilePath:String?
-    var writeFileHandle:NSFileHandle?
+    var saveFilePath:String?
+    var cacheFileHandle:NSFileHandle?
+    var saveFileHandle:NSFileHandle?
     var readFileHandle:NSFileHandle?
     var totalDataLength:Int64 = 0
     var isFinishedLoading:Bool = false
     var decryptor:CommonCrytoFunctions?
+    var fileName:String?
+    
     
     init(URL: NSURL, key:String, IV:String) {
         super.init()
@@ -38,12 +42,24 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
         self.decryptor = CommonCrytoFunctions(key:key, andIV: IV)
         let request = NSMutableURLRequest(URL: URL)
         connection = NSURLConnection(request: request, delegate: self, startImmediately: false)
-        if let cacheFileName = URL.absoluteString?.componentsSeparatedByString("/").last,
+        self.fileName = URL.absoluteString?.componentsSeparatedByString("/").last
+        if let cacheFileName = self.fileName?.stringByAppendingString(".cache"),
+           let tempFileName = self.fileName?.stringByAppendingString(".temp"),
            let docDirPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as? String{
                 self.cacheFilePath = docDirPath.stringByAppendingPathComponent(cacheFileName)
                 if NSFileManager.defaultManager().createFileAtPath(self.cacheFilePath!, contents: nil, attributes: nil) == true {
-                    self.writeFileHandle = NSFileHandle(forWritingAtPath: self.cacheFilePath!)
+                    self.cacheFileHandle = NSFileHandle(forWritingAtPath: self.cacheFilePath!)
                     self.readFileHandle = NSFileHandle(forReadingAtPath: self.cacheFilePath!)
+                }
+                //check if file exists in local
+                self.saveFilePath = docDirPath.stringByAppendingPathComponent(fileName!)
+                if !NSFileManager.defaultManager().fileExistsAtPath(self.saveFilePath!){
+                    //if does not exists than make a temp file in local
+                    self.saveFilePath = docDirPath.stringByAppendingPathComponent(tempFileName)
+                    if NSFileManager.defaultManager().createFileAtPath(self.saveFilePath!, contents: nil, attributes: nil) == true {
+                        //make a handle for temp file
+                        self.saveFileHandle = NSFileHandle(forWritingAtPath: self.saveFilePath!)
+                    }
                 }
         }
     }
@@ -59,7 +75,8 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
             if !isFinishedLoading {
                 con.cancel()
                 isFinishedLoading = true
-                self.writeFileHandle?.closeFile()
+                self.saveFileHandle?.closeFile()
+                self.cacheFileHandle?.closeFile()
                 processPlayerRequest()
             }
 
@@ -76,8 +93,10 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
         self.mimeType = "video/mp4";
         self.contentLength = response.expectedContentLength
-
-        println("\((response as? NSHTTPURLResponse)?.statusCode)")
+        if let statusCode = (response as? NSHTTPURLResponse)?.statusCode{
+            println("\(statusCode)")
+        }
+        
         var req:AVAssetResourceLoadingRequest = self.requests.objectAtIndex(0) as! AVAssetResourceLoadingRequest
         req.contentInformationRequest.byteRangeAccessSupported = true
         req.contentInformationRequest.contentLength = self.contentLength!
@@ -87,7 +106,11 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     }
     
     func connection(connection: NSURLConnection, didReceiveData data: NSData) {
-        if let handle = writeFileHandle {
+        if let handle = cacheFileHandle{
+            if let saveFile = self.saveFileHandle{
+                saveFile.writeData(data)
+                saveFile.seekToEndOfFile()
+            }
             var decryptedData = self.decryptor?.decrypt(data)
             totalDataLength += (decryptedData?.length)!
             handle.writeData(decryptedData!)
@@ -104,15 +127,28 @@ class DownloadConnection: NSObject, NSURLConnectionDataDelegate, NSURLConnection
     
     
     func connectionDidFinishLoading(connection: NSURLConnection) {
-        self.writeFileHandle?.writeData((decryptor?.final())!)
-        self.writeFileHandle?.closeFile()
+        self.cacheFileHandle?.writeData((decryptor?.final())!)
+        self.cacheFileHandle?.closeFile()
         isFinishedLoading = true;
         processPlayerRequest()
         println("finished loading")
+        if let handle = self.saveFileHandle{
+            self.saveFileHandle?.closeFile()
+            if let docDirPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as? String{
+                let saveFile = docDirPath.stringByAppendingPathComponent(self.fileName!)
+                var error:NSError?
+                if !NSFileManager.defaultManager().moveItemAtPath(self.saveFilePath!, toPath: saveFile, error: &error){
+                    println("File Saving failed")
+                }else{
+                    println("Saved")
+                }
+            }
+        }
     }
     
     override func finalize() {
         self.readFileHandle?.closeFile()
+        NSFileManager.defaultManager()
     }
     
     func  processPlayerRequest(){
