@@ -41,7 +41,7 @@ class ViewController: UIViewController {
         println("The status message is \(statusMessage)")
         
         let (justTheStatusCode, _) = http404Error
-        println("Jusy code is \(justTheStatusCode)")
+        println("Just code is \(justTheStatusCode)")
 
         let http200Status = (statusCode: 200, description: "OK")
         println("The status code is \(http200Status.statusCode)")
@@ -70,6 +70,106 @@ class ViewController: UIViewController {
         let age = 3 // < 0 value cause Assertions to stop execution of app.
         assert(age >= 0, "A person's age cannot be less than zero")
         // this causes the assertion to trigger, because age is not >= 0
+        
+        var a = 0
+        let b = ++a
+        println("a = \(a) : b = \(b)")
+        // a and b are now both equal to 1
+        let c = a++
+        println("a = \(a) : c = \(c)")
+
+        // Nil Coalescing Operator ??
+        let defaultColorName = "red"
+        var userDefinedColorName: String?   // defaults to nil
+        var colorNameToUse = userDefinedColorName ?? defaultColorName
+        println(colorNameToUse)
+        userDefinedColorName = "green"
+        colorNameToUse = userDefinedColorName ?? defaultColorName
+        println(colorNameToUse)
+        
+        // Closed Range Operator
+        for index in 1...5 {
+            println("\(index) times 5 is \(index * 5)")
+        }
+        
+        // Half-Open Range Operator
+        let names = ["Anna", "Alex", "Brian", "Jack"]
+        let length = names.count
+        for i in 0..<length {
+            println("Person \(i + 1) is called \(names[i])")
+        }
+        
+        var emptyString = ""               // empty string literal
+        var anotherEmptyString = String()
+        if emptyString.isEmpty {
+            println("Nothing to see here")
+        }
+        
+        var variableString = "Horse"
+        variableString += " and carriage"
+        println(variableString)
+        
+        for character in "Dog!🐶" {
+            println(character)
+        }
+        
+        let catCharacters: [Character] = ["C", "a", "t", "!", "🐱"]
+        var catString = String(catCharacters)
+        println("\(catCharacters) : \(catString)")
+        
+        let dollar: Character = "$"
+        catString.append(dollar)
+        println(catString)
+        
+        let multiplier = 3
+        let message = "\(multiplier) times 2.5 is \(Double(multiplier) * 2.5)"
+        println(message)
+        
+        let dollarSign = "\u{24}"
+        let blackHeart = "\u{2665}"
+        let sparklingHeart = "\u{1F496}"
+        println("\(dollarSign) : \(blackHeart) : \(sparklingHeart)")
+        
+        let eAcute: Character = "\u{E9}"
+        let combinedEAcute: Character = "\u{65}\u{301}"
+        println("\(eAcute) : \(combinedEAcute)")
+        
+        let precomposed: Character = "\u{D55C}"
+        let decomposed: Character = "\u{1112}\u{1161}\u{11AB}"
+        println("\(precomposed) : \(decomposed)")
+        
+        let enclosedEAcute: Character = "\u{E9}\u{20DD}"
+        println(enclosedEAcute)
+        
+        let regionalIndicatorForIndia = "\u{1F1EE}\u{1F1F3}"
+        println(regionalIndicatorForIndia)
+        
+        let unusualMenagerie = "Koala 🐨, Snail 🐌, Penguin 🐧, Dromedary 🐪"
+        println("unusualMenagerie has \(count(unusualMenagerie)) characters")
+        
+        let greeting = "Guten Tag"
+        println("\(greeting.startIndex) : \(greeting.endIndex) : \(greeting[greeting.startIndex])")
+        println(greeting[greeting.startIndex.successor()])
+        println(greeting[greeting.endIndex.predecessor()])
+        let idx = advance(greeting.startIndex, 7)
+        println(greeting[idx])
+ 
+        for index in indices(greeting) {
+            print("\(greeting[index]) ")
+        }
+        println("\n")
+        
+        var welcome = "hello"
+        welcome.insert("!", atIndex: welcome.endIndex)
+        println(welcome)
+        welcome.splice(" there", atIndex: welcome.endIndex.predecessor())
+        println(welcome)
+        welcome.removeAtIndex(welcome.endIndex.predecessor())
+        println(welcome)
+        
+        let rng = advance(welcome.endIndex, -6)..<welcome.endIndex
+        welcome.removeRange(rng)
+        println(welcome)
         
     }
 
