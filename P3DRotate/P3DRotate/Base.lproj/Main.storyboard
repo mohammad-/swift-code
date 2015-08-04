@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="vXZ-lx-hvc">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="ufC-wZ-h7g">
+            <objects>
+                <viewController id="vXZ-lx-hvc" customClass="ViewController" customModule="P3DRotate" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="jyV-Pf-zRb"/>
+                        <viewControllerLayoutGuide type="bottom" id="2fi-mo-0CV"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <view alpha="0.5499999999999996" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GuJ-FE-w7t" userLabel="View1">
+                                <rect key="frame" x="120" y="150" width="360" height="300"/>
+                                <color key="backgroundColor" red="0.0" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            </view>
+                            <view alpha="0.55000001192092896" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bek-Yr-Xly" userLabel="View2">
+                                <rect key="frame" x="120" y="150" width="360" height="300"/>
+                                <color key="backgroundColor" red="0.60000002384185791" green="0.40000000596046448" blue="0.20000000298023224" alpha="1" colorSpace="calibratedRGB"/>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ukM-WI-bRL">
+                                <rect key="frame" x="277" y="550" width="46" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="TKi-yF-uZV"/>
+                                    <constraint firstAttribute="width" constant="46" id="c8k-LZ-Hcx"/>
+                                </constraints>
+                                <state key="normal" title="Rotate">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="rotate:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="IzJ-f4-7Cc"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="centerX" secondItem="ukM-WI-bRL" secondAttribute="centerX" id="4mR-VX-Qoj"/>
+                            <constraint firstAttribute="centerX" secondItem="GuJ-FE-w7t" secondAttribute="centerX" id="6XB-Dp-5CR"/>
+                            <constraint firstItem="GuJ-FE-w7t" firstAttribute="height" secondItem="kh9-bI-dsS" secondAttribute="height" multiplier="0.5" id="7Xt-qd-gtZ"/>
+                            <constraint firstAttribute="centerX" secondItem="Bek-Yr-Xly" secondAttribute="centerX" id="Hd0-ne-0Nx"/>
+                            <constraint firstAttribute="centerY" secondItem="Bek-Yr-Xly" secondAttribute="centerY" id="LaV-Cc-QDA"/>
+                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="ukM-WI-bRL" secondAttribute="bottom" constant="20" id="bzb-wk-J6x"/>
+                            <constraint firstItem="GuJ-FE-w7t" firstAttribute="width" secondItem="Bek-Yr-Xly" secondAttribute="width" id="ewG-Vp-PXm"/>
+                            <constraint firstAttribute="centerY" secondItem="GuJ-FE-w7t" secondAttribute="centerY" id="hTO-ds-nXM"/>
+                            <constraint firstItem="GuJ-FE-w7t" firstAttribute="width" secondItem="kh9-bI-dsS" secondAttribute="width" multiplier="0.6" id="tMM-b7-HNF"/>
+                            <constraint firstItem="GuJ-FE-w7t" firstAttribute="height" secondItem="Bek-Yr-Xly" secondAttribute="height" id="yQF-Nq-Shb"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="centerView" destination="GuJ-FE-w7t" id="RKd-Z1-h18"/>
+                        <outlet property="view2" destination="Bek-Yr-Xly" id="MgH-NO-cJE"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-74" y="-2"/>
+        </scene>
+    </scenes>
+</document>
