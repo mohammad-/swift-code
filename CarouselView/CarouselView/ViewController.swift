@@ -113,6 +113,9 @@ class ViewController: UIViewController, UIScrollViewDelegate {
                 let view:CardView = self.viewArray.objectAtIndex(i) as! CardView
                 if(view.cardIndex > 0){
                     view.currentScale += (scaleFactor/centerY)
+                    if view.currentScale > 1.0 - (CGFloat(view.cardIndex) * scaleFactor){
+                       view.currentScale = 1.0 - (CGFloat(view.cardIndex) * scaleFactor)
+                    }
                     view.currentY += (moveFactor/centerY)
                     let st = CGAffineTransformMakeScale(view.currentScale, view.currentScale)
                     let sy = CGAffineTransformMakeTranslation(0, view.currentY)
