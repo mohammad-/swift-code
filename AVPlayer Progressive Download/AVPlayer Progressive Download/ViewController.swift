@@ -10,10 +10,19 @@
 import UIKit
 import AVFoundation
 
-var fileUrl = "https://s3-ap-northeast-1.amazonaws.com/fans-software/L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
+//var fileUrl = "https://s3-ap-northeast-1.amazonaws.com/fans-software/L1-Introduction_to_Finite-State_Machines_and_Regular_Languages-enc.mp4"
+//var fileUrl = "http://localhost:8080/207847-COCA-16951-T02-320k.m4a"
+var fileUrl = "http://localhost:8080/enc.m4a"
 //var fileUrl = "https://s3-ap-northeast-1.amazonaws.com/fans-software/openssl_output.mp4"
 var fileKey = "111C8197C8BDEC29005F9E9F5EAF54D9"
 var fileIv = "3BD2CD5D9A309F8267BB89EE66AF9840"
+
+
+//var fileKey = "1ea35a8a1acd6d07a7d511b5d18a6608"
+//var fileIv =  "00000000000000000000000000000000"
+
+//var fileKey = "A219DEB20F118754A4280A77F842BDBF"
+//var fileIv =  "8FA2B875AF17E14A946C879EF988A6B2"
 
 enum PlayerStatus{
     case Playing
@@ -41,7 +50,13 @@ class ViewController: UIViewController, AVAssetResourceLoaderDelegate, DataRecei
         super.viewDidLoad()
         self.view.bringSubviewToFront(self.play)
         self.view.bringSubviewToFront(self.pause)
-
+        var encryptedKey = "e4e63b8c471d30c538db94d63a9530d8128284808f0c6cdf2d1e0b73fa4256a4222a048388a7db8e3cec964b89dcf367"
+        var key = "352136060683063a"
+        var iv = "11aa44b7c1e3ecb6"
+        
+        var c = CommonCrytoFunctions(with16ByteKey: key, andIV: iv)
+        var data = c.decryptString(encryptedKey)
+        print("\(data)")
     }
 
     override func viewWillAppear(animated: Bool) {

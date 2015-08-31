@@ -15,6 +15,8 @@
 
 }
 -(id)initWithKey:(NSString*)key andIV:(NSString*)iv;
+-(id)initWith16ByteKey:(NSString*)_key andIV:(NSString*)_iv;
 -(NSData*)decrypt:(NSData*)data;
+-(NSString*)decryptString:(NSString*)string;
 -(NSData*)final;
 @end

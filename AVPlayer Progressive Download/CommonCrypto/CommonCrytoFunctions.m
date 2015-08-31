@@ -26,6 +26,35 @@
     return self;
 }
 
+-(id)initWith16ByteKey:(NSString*)_key andIV:(NSString*)_iv{
+    self = [super init];
+    if (self) {
+        //@"111C8197C8BDEC29005F9E9F5EAF54D9"
+        NSData *keyData = [_key dataUsingEncoding:NSUTF8StringEncoding];
+        [keyData getBytes:&key length:16];
+        
+        //@"3BD2CD5D9A309F8267BB89EE66AF9840"
+        NSData *ivData = [_iv dataUsingEncoding:NSUTF8StringEncoding];
+        [ivData getBytes:&iv length:16];
+        
+        CCCryptorCreate(kCCDecrypt, kCCAlgorithmAES128, ccNoPadding, key, kCCKeySizeAES128, iv, &cryptorRef);
+        
+    }
+    return self;
+}
+
+-(NSString*)decryptString:(NSString*)string{
+    NSData *data = [self dataFromHexString:string];
+    size_t dataLength = [data length];
+    size_t bufferSize = dataLength + kCCBlockSizeAES128;
+    void *buffer = malloc(bufferSize);
+    size_t dataOutMoved;
+    CCCryptorUpdate(cryptorRef, [data bytes], dataLength, buffer, bufferSize, &dataOutMoved);
+    NSData *d = [NSData dataWithBytesNoCopy:buffer length:dataOutMoved];
+    return [[NSString alloc] initWithData:d encoding:NSUTF8StringEncoding];
+}
+
+
 -(NSData*)decrypt:(NSData*)data{
     size_t dataLength = [data length];
     size_t bufferSize = dataLength + kCCBlockSizeAES128;
@@ -45,7 +74,7 @@
 
 - (NSData *)dataFromHexString:(NSString*)string {
     const char *chars = [string UTF8String];
-    int i = 0, len = 32;
+    int i = 0, len = [string length];
     
     NSMutableData *data = [NSMutableData dataWithCapacity:len / 2];
     char byteChars[3] = {'\0','\0','\0'};
